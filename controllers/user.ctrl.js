@@ -1,47 +1,48 @@
-const bcrypt = require('bcryptjs');
 
 const User = require('../models/User');
 const BaseController = require('./base.ctrl');
 
 
 class UserController extends BaseController {
-
-    async comparePassword(password, hash) {
-        return await bcrypt.comparePassword(password, hash);
+    constructor(){
+        super()
     }
 
     async create(req, res) {
-        this.checkReqBody(req);
+        super.checkReqBody(req);
         try {
             const {username, password} = req.body;
             const existingUser = await User.findOne({username});
             if (existingUser)
-                return this.sendError(res, null, 'A user already exists with the same username', 400);
+                return super.sendError(res, null, 'A user already exists with the same username', 400);
             
             const userParams = {username, password};
             const newUser = new User(userParams);
-            const savedUser = await newUser.save();
-            savedUser.token = this.generateToken(savedUser);
-            return this.sendSuccess(savedUser);
+            let savedUser = await newUser.save();
+            let tokenData = {userId: savedUser._id, username: savedUser.username}
+            let token = super.generateToken(tokenData);
+            savedUser = {token, user: savedUser}
+            return super.sendSuccess(res, savedUser);
         } catch (err) {
-            return this.sendError(res, err, err.message, err.status);
+            return super.sendError(res, err, err.message, err.status);
         }
     }
 
     async login(req, res) {
-        this.checkReqBody(req);
+        super.checkReqBody(req);
         try {
             const {username, password} = req.body;
-            const userInDb = await User.findOne({username});
-            if (userInDb && this.comparePassword(password, userInDb.password)) {
-                const token = this.generateToken(userInDb);
-                userInDb.token = token;
-                return this.sendSuccess(userInDb);
+            let userInDb = await User.findOne({username});
+            if (userInDb && await super.comparePassword(password, userInDb.password)) {
+                let tokenData = {userId: userInDb._id, username: userInDb.username}
+                const token = super.generateToken(tokenData);
+                userInDb = {token, user: userInDb}
+                return super.sendSuccess(res, userInDb);
             }
         
-            return this.sendError(res, null, 'Incorrect username or password', 400);
+            return super.sendError(res, null, 'Incorrect username or password', 400);
         } catch (err) {
-            return this.sendError(res, err, err.message, err.status);
+            return super.sendError(res, err, err.message, err.status);
         }
     }
 
@@ -50,13 +51,13 @@ class UserController extends BaseController {
         try {
             const user = await User.findOne({username});
             if (!user) {
-                return this.sendError(res, null, 'User not found', 404);
+                return super.sendError(res, null, 'User not found', 404);
             }
-            return this.sendSuccess(res, user, 'Successful');
+            return super.sendSuccess(res, user, 'Successful');
         } catch (err) {
-            return this.sendError(res, err, err.message, err.status);
+            return super.sendError(res, err, err.message, err.status);
         } 
     }
 }
 
-module.exports = UserController();
+module.exports = new UserController();

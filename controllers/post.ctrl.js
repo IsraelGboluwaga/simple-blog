@@ -73,4 +73,4 @@ class PostController extends BaseController {
     }
 }
 
-module.exports = PostController();
+module.exports = new PostController();

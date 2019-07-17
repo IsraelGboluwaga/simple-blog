@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
-const BaseController = require('../controllers/base.ctrl')();
+let baseCtrl = require('../controllers/base.ctrl')
+const BaseController = new baseCtrl();
 const PostController = require('../controllers/post.ctrl');
 
 

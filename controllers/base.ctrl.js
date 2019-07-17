@@ -1,8 +1,14 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+let Constants = {
+    SUCCESS: 200,
+    ERROR: 500
+}
+let jwtSecret = 'Beckie';
 
 module.exports = class BaseController {
-    jwtSecret = 'Beckie';
+    
     
     /**
      * Generic send success helper
@@ -55,11 +61,15 @@ module.exports = class BaseController {
     }
 
     generateToken(userObject) {
-        return jwt.sign(userObject, this.jwtSecret);
+        return jwt.sign(userObject, jwtSecret);
     }
     
     verifyToken(token) {
-        return jwt.verify(token, this.jwtSecret);
+        return jwt.verify(token, jwtSecret);
+    }
+
+    async comparePassword(password, hash) {
+        return await bcrypt.compare(password, hash);
     }
 
     // This shouldn't be here

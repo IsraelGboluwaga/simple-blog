@@ -1,6 +1,8 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+const bodyParser = require('body-parser')
+const morgan = require('morgan');
+const logger = require('fancy-log')
 const bluebird = require('bluebird');;
 const helmet = require('helmet');
 const cors = require('cors');
@@ -11,7 +13,7 @@ require('dotenv').config();
 
 const app = express();
 
-app.use(logger('dev'));
+app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -23,7 +25,6 @@ connectionString = 'mongodb://localhost:27017/becky-blog-api'
 mongoose.connect(connectionString, { useNewUrlParser: true })
         .then((db) => {
             logger.info('Mongo Connection Established');
-
             // If the Node process ends, close the Mongoose connection
             process.on('SIGINT', () => {
                 logger.error('Mongoose default connection disconnected through app termination');
@@ -51,7 +52,7 @@ app.use('/users', usersRouter);
 app.use('/posts', postsRouter);
 
 const port = process.env.PORT || 7900;
-app.listen((port) => {
+app.listen(port, () => {
     console.log(`App listening on ${port}`);
 });
 module.exports = app;
