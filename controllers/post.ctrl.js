@@ -6,56 +6,70 @@ const BaseController = require('./base.ctrl');
 class PostController extends BaseController {
 
     async create(req, res) {
-        this.checkReqBody(req);
+        let {user: {_id, posts}} = req;
+        super.checkReqBody(req);
         try {
-            const { title, body, author_id } = req.body;
+            const { title, body } = req.body;
             const postParams = {
-                title, body, author_id
+                title, body, author: [_id]
             };
-            const newPost = new User(postParams);
+            const newPost = new Post(postParams);
             const savedPost = await newPost.save();
-            return this.sendSuccess(savedPost);
+            await this._pushPostToUser(_id, savedPost._id)
+            return super.sendSuccess(res, savedPost);
         } catch (err) {
-            return this.sendError(res, err, err.message, err.status);
+            return super.sendError(res, err, err.message, err.status);
+        }
+    }
+
+    async _pushPostToUser(user_id, post_id) {
+        try{
+            let user = await User.findById(user_id);
+            user.posts.push(post_id);
+            await user.save()
+        }catch(error){
+            throw (error)
         }
     }
 
     async like(req, res) {
-        const postId = this.params.post_id;
+        const postId = req.params.post_id;
         try {
-            const post = Post.findOne({ _id: postId });
+            let post = await Post.findOne({ _id: postId });
             if (!post) {
-                return this.sendError(res, null, 'Post not found', 404);
+                return super.sendError(res, null, 'Post not found', 404);
             }
 
-            post.likes += 1
-            const savedPost = post.save();
-            return this.sendSuccess(res, savedPost, 'Liked');
+            let likes = post.likes;
+            post.likes = likes + 1;
+            let updatedPost = await post.save()
+
+            return super.sendSuccess(res, updatedPost, 'Liked');
         } catch (err) {
-            return this.sendError(res, err, err.message, err.status);
+            return super.sendError(res, err, err.message, err.status);
         }
     }
 
     async getAllPosts(req, res) {
         try {
-            const posts = await Post.find({});
-            return this.sendSuccess(res, posts, 'Successful');
+            const posts = await Post.find({}).populate('posts');;
+            return super.sendSuccess(res, posts, 'Successful');
         } catch (err) {
-            return this.sendError(res, err, err.message, err.status);
+            return super.sendError(res, err, err.message, err.status);
         }
     }
 
     async getSinglePostById(req, res) {
-        const postId = this.params.post_id;
+        const postId = req.params.post_id;
         try {
-            const post = Post.findOne({ _id: postId });
+            const post = await Post.findOne({ _id: postId }).populate('posts');
             if (!post) {
-                return this.sendError(res, null, 'Post not found', 404);
+                return super.sendError(res, null, 'Post not found', 404);
             }
 
-            return this.sendSuccess(res, post, 'Successful');
+            return super.sendSuccess(res, post, 'Successful');
         } catch (err) {
-            return this.sendError(res, err, err.message, err.status);
+            return super.sendError(res, err, err.message, err.status);
         }
     }
 
@@ -64,13 +78,13 @@ class PostController extends BaseController {
             const username = req.params.username;
             const user = await User.findOne({username}).populate('posts');
             if (!user) {
-                return this.sendError(res, null, 'Author does not exist');
+                return super.sendError(res, null, 'Author does not exist');
             }
-            return this.sendSuccess(res, user.posts, 'Successful');
+            return super.sendSuccess(res, user.posts, 'Successful');
         } catch (err) {
-            return this.sendError(res, err, err.message, err.status);
+            return super.sendError(res, err, err.message, err.status);
         }
     }
 }
 
-module.exports = PostController();
+module.exports = new PostController();
