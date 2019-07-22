@@ -1,13 +1,10 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
-let Constants = {
-    SUCCESS: 200,
-    ERROR: 500
-}
+
 let jwtSecret = 'Beckie';
 
- class BaseController {    
+class BaseController {    
     constructor(){
     }
     /**
@@ -20,7 +17,7 @@ let jwtSecret = 'Beckie';
      * @param header
      */
     sendSuccess(res, data, message, status, header) {
-        let resp = { status: Constants.SUCCESS };
+        let resp = { status: true };
 
         if (message)
             resp.message = message;
@@ -29,6 +26,7 @@ let jwtSecret = 'Beckie';
             resp.data = data;
 
         status = status ? status : 200;
+        resp.HttpStatus = status;        
 
         if (header) return res.header(header, token).status(status).json(resp);
 
@@ -43,13 +41,14 @@ let jwtSecret = 'Beckie';
      * @param status
      */
     sendError(res, error, message, status) {
-        let resp = { status: Constants.ERROR };
+        let resp = { status: false };
         resp.message = message ? message : 'An error occurred, please try again';
 
         if (error)
             resp.error = error.stack;
 
         status = status ? status : 500;
+        resp.HttpStatus = status; 
 
         return res.status(status).json(resp);
     }
