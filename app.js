@@ -9,6 +9,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const postsRouter = require('./routes/posts');
 const usersRouter = require('./routes/users');
+const cloudinary = require('cloudinary');
 require('dotenv').config();
 
 const app = express();
@@ -19,6 +20,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+cloudinary.config({ 
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+    api_key: process.env.CLOUDINARY_API_KEY, 
+    api_secret: process.env.CLOUDINARY_API_SECRET 
+  });
+  
 
 mongoose.Promise = bluebird;
 connectionString = 'mongodb://localhost:27017/becky-blog-api'

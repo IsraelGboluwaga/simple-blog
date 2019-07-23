@@ -10,10 +10,14 @@ const postSchema = new Schema({
         type: String,
         required: true
     },
-    author: [{
+    author: {
         type:  Schema.Types.ObjectId,
         ref: 'User'
-    }],
+    },
+    image: {
+        type: String,
+        required: true
+    },
     likes: {
         type: Number,
         default: 0

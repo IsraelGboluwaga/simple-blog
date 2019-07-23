@@ -1,17 +1,23 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
 const BaseController = require('./base.ctrl');
+const cloudinary = require('../cloudinary');
 
 
 class PostController extends BaseController {
 
     async create(req, res) {
-        let {user: {_id, posts}} = req;
+        let { user: { _id, posts } } = req;
         super.checkReqBody(req);
+        if (!req.files) {
+            return super.sendError(res, null, 'Request file body empty', 400);
+        }
+
         try {
+            postImage = req.files.image && req.files.image.path;
             const { title, body } = req.body;
             const postParams = {
-                title, body, author: [_id]
+                title, body, author: _id, image: postImage
             };
             const newPost = new Post(postParams);
             const savedPost = await newPost.save();
@@ -23,11 +29,11 @@ class PostController extends BaseController {
     }
 
     async _pushPostToUser(user_id, post_id) {
-        try{
+        try {
             let user = await User.findById(user_id);
             user.posts.push(post_id);
             await user.save()
-        }catch(error){
+        } catch (error) {
             throw (error)
         }
     }
@@ -76,7 +82,7 @@ class PostController extends BaseController {
     async getPostsByAuthor(req, res) {
         try {
             const username = req.params.username;
-            const user = await User.findOne({username}).populate('posts');
+            const user = await User.findOne({ username }).populate('posts');
             if (!user) {
                 return super.sendError(res, null, 'Author does not exist');
             }
