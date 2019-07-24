@@ -15,9 +15,10 @@ class PostController extends BaseController {
 
         try {
             postImage = req.files.image && req.files.image.path;
+            cloudinaryUrl = cloudinary(postImage);
             const { title, body } = req.body;
             const postParams = {
-                title, body, author: _id, image: postImage
+                title, body, author: _id, image: cloudinaryUrl
             };
             const newPost = new Post(postParams);
             const savedPost = await newPost.save();
@@ -58,7 +59,7 @@ class PostController extends BaseController {
 
     async getAllPosts(req, res) {
         try {
-            const posts = await Post.find({}).populate('posts');;
+            const posts = await Post.find({});;
             return super.sendSuccess(res, posts, 'Successful');
         } catch (err) {
             return super.sendError(res, err, err.message, err.status);
@@ -68,7 +69,7 @@ class PostController extends BaseController {
     async getSinglePostById(req, res) {
         const postId = req.params.post_id;
         try {
-            const post = await Post.findOne({ _id: postId }).populate('posts');
+            const post = await Post.findOne({ _id: postId });
             if (!post) {
                 return super.sendError(res, null, 'Post not found', 404);
             }
