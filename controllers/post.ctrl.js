@@ -1,24 +1,18 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
 const BaseController = require('./base.ctrl');
-const cloudinary = require('../cloudinary');
 
 
 class PostController extends BaseController {
 
     async create(req, res) {
-        let { user: { _id, posts } } = req;
+        let { _id } = req.user;
         super.checkReqBody(req);
-        if (!req.files) {
-            return super.sendError(res, null, 'Request file body empty', 400);
-        }
 
         try {
-            postImage = req.files.image && req.files.image.path;
-            cloudinaryUrl = cloudinary(postImage);
-            const { title, body } = req.body;
+            const { title, body, image_url } = req.body;
             const postParams = {
-                title, body, author: _id, image: cloudinaryUrl
+                title, body, author: _id, image_url
             };
             const newPost = new Post(postParams);
             const savedPost = await newPost.save();
