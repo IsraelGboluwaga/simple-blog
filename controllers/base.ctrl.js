@@ -72,19 +72,12 @@ class BaseController {
             if (err) {
                 throw err;
             }
-
-            console.log('------');
-            console.log(password);
-            console.log(hash);
-            console.log(isMatch);
-            console.log('------');
             return isMatch;
         });
     }
 
     // This shouldn't be here
     async authenticateUser(req, res, next) {
-        console.log({this: this})
         try {
             if (!req.headers || !req.headers['auth-token']) {
                 return this.sendError(res, null, 'You do not have access to this resource', 401);
