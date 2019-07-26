@@ -27,7 +27,7 @@ class PostController extends BaseController {
         try {
             let user = await User.findById(user_id);
             user.posts.push(post_id);
-            await user.save()
+            user.update();
         } catch (error) {
             throw (error)
         }

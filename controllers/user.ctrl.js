@@ -33,8 +33,12 @@ class UserController extends BaseController {
         try {
             const { username, password } = req.body;
             let userInDb = await User.findOne({ username });
-            if (userInDb && await super.comparePassword(password, userInDb.password)) {
-                let tokenData = { userId: userInDb._id, username: userInDb.username }
+            if (userInDb) {
+                const isPasswordCorrect = super.comparePassword(password, userInDb.password);
+                if (!isPasswordCorrect) {
+                    return super.sendError(res, null, 'Incorrect username or password', 400);
+                }
+                let tokenData = { userId: userInDb._id, username: userInDb.username };
                 const token = super.generateToken(tokenData);
                 userInDb = { token, user: userInDb }
                 return super.sendSuccess(res, userInDb);

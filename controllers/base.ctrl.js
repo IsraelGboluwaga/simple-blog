@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const User = require('../models/User');
 
 let jwtSecret = 'Beckie';
@@ -68,7 +68,18 @@ class BaseController {
     }
 
     async comparePassword(password, hash) {
-        return await bcrypt.compare(password, hash);
+        return bcrypt.compare(password, hash, (err, isMatch) => {
+            if (err) {
+                throw err;
+            }
+
+            console.log('------');
+            console.log(password);
+            console.log(hash);
+            console.log(isMatch);
+            console.log('------');
+            return isMatch;
+        });
     }
 
     // This shouldn't be here
